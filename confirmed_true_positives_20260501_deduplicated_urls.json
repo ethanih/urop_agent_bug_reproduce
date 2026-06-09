@@ -1,7 +1,10 @@
 [
-  "https://github.com/openai/codex/issues/362",
+  "https://github.com/openai/codex/issues/362", 
+
   "https://github.com/openai/codex/issues/593",
+
   "https://github.com/openai/codex/issues/666",
+
   "https://github.com/openai/codex/issues/802",
   "https://github.com/openai/codex/issues/820",
   "https://github.com/openai/codex/issues/1075",
@@ -81,6 +84,9 @@
   "https://github.com/openai/codex/issues/12923",
   "https://github.com/openai/codex/issues/14146",
   "https://github.com/openai/codex/issues/15868",
+  
+
+  
   "https://github.com/crewAIInc/crewAI/issues/316",
   "https://github.com/crewAIInc/crewAI/issues/351",
   "https://github.com/crewAIInc/crewAI/issues/620",

@@ -1,5 +1,4 @@
 from typing import Type
-
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field, ValidationError
 
@@ -7,15 +6,12 @@ from pydantic import BaseModel, Field, ValidationError
 class CityInput(BaseModel):
     city: str = Field(..., description="City name")
 
-
 class TravelDetailsTool(BaseTool):
     name: str = "get_travel_details"
     description: str = "Get travel details for a city."
     args_schema: Type[BaseModel] = CityInput
-
     def _run(self, city: str) -> str:
         return f"Details for {city}"
-
 
 def format_validation_error(tool_name: str, error: ValidationError) -> str:
     details = error.errors()[0]
