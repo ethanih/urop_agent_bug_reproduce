@@ -1,3 +1,5 @@
+# https://github.com/crewAIInc/crewAI/issues/4788
+
 # Issue 4788 Reproduction
 
 Source issue: `crewAIInc/crewAI#4788`
@@ -33,13 +35,32 @@ The script mirrors the bug by implementing two paths:
 - `llm_buggy_branch_order(...)` returns as soon as it sees text.
 - `llm_fixed_branch_order(...)` prioritizes tool calls whenever they are present.
 
-## Run
+## Environment
 
-```bash
-python reproduce_text_plus_tool_calls_bug.py
-```
+- Python 3.12 or newer
+- No external services required
 
-Expected output:
+## Reproduction Steps
+
+1. Create a virtual environment:
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. Run the script:
+
+   ```bash
+   python reproduce.py
+   ```
+
+## Expected Result
+
+If the parser processed both content and tool calls correctly, the tool call
+would not be dropped.
+
+## Actual Result
 
 ```text
 Incoming response:
