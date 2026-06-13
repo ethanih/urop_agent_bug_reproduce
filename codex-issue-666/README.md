@@ -28,7 +28,7 @@ This MRE reproduces that behavior without depending on Codex itself:
 1. Open the reproduction directory:
 
    ```bash
-   cd issue-666-codex
+   cd codex-issue-666
    ```
 
 2. Create a virtual environment if you want an isolated Python runtime:

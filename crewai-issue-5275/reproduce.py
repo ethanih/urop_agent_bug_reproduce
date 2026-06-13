@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""Real-dependency reproduction for crewAI issue #5275.
+
+This issue depends on the actual crewAI tool-argument extraction logic and a
+real Bedrock-style tool call payload. The reproduction keeps the runtime small
+but still uses the real dependency versions listed in `requirements.txt`.
+"""
+
+from __future__ import annotations
+
 import json
 from typing import Any
 
