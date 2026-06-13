@@ -1,36 +1,30 @@
 #!/usr/bin/env python3
-"""Minimal reproduction for LangChain issue #2241.
-
-The issue reports that nested markdown code blocks can break the conversational
-chat agent response parsing. This script models the delimiter collision.
-"""
+"""Two-stage minimal reproduction for LangChain issue #2241."""
 
 from __future__ import annotations
 
 
-def buggy_parse_agent_json(response_text: str) -> str:
-    # BUG: a naive fence split stops at the first nested triple-backtick block.
-    parts = response_text.split("```")
-    if len(parts) < 3:
-        raise ValueError("Missing JSON code block")
-    return parts[1].strip()
+def buggy_extract_json_block(response_text: str) -> str:
+    """Naively split on code fences, matching the issue's failure mode."""
+
+    return response_text.split("```")[1].strip()
 
 
-def fixed_parse_agent_json(response_text: str) -> str:
-    # Correct behavior: treat the outer response wrapper separately from any
-    # inner markdown fence that appears in the payload.
-    outer_start = response_text.find("```json")
-    outer_end = response_text.rfind("```")
-    if outer_start == -1 or outer_end == -1 or outer_end <= outer_start:
-        raise ValueError("Missing JSON code block")
-    return response_text[outer_start + len("```json"):outer_end].strip()
+def fixed_extract_json_block(response_text: str) -> str:
+    """Extract the outer JSON fence without being confused by inner fences."""
+
+    start = response_text.find("```json")
+    end = response_text.rfind("```")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("Missing outer JSON code block")
+    return response_text[start + len("```json"):end].strip()
 
 
 def main() -> int:
     response_text = """```json
 {
   "action": "Final Answer",
-  "action_input": "Use this snippet: ```python\\nprint('hello')\\n```"
+  "action_input": "Here is the generated code:\\n```python\\nprint('hello')\\n```"
 }
 ```"""
 
@@ -38,18 +32,18 @@ def main() -> int:
     print(response_text)
     print()
 
-    buggy_value = buggy_parse_agent_json(response_text)
-    fixed_value = fixed_parse_agent_json(response_text)
+    buggy = buggy_extract_json_block(response_text)
+    fixed = fixed_extract_json_block(response_text)
 
-    print("Buggy parsed payload:")
-    print(buggy_value)
+    print("Buggy extracted payload:")
+    print(buggy)
     print()
 
-    print("Fixed parsed payload:")
-    print(fixed_value)
+    print("Fixed extracted payload:")
+    print(fixed)
 
-    assert buggy_value.startswith("json")
-    assert "print('hello')" in fixed_value
+    assert "```python" not in buggy
+    assert "```python" in fixed
     return 0
 
 

@@ -1,6 +1,6 @@
 # https://github.com/langchain-ai/langchain/issues/2252
 
-# Issue 2252 Reproduction
+# Issue 2252 Reproduction V2
 
 Source issue: `langchain-ai/langchain#2252`
 
@@ -8,12 +8,12 @@ Source issue: `langchain-ai/langchain#2252`
 
 This is a minimal reproduction.
 
-The issue is about inconsistent tool selection in the dataframe agent. A small
-question classifier is enough to show the buggy behavior.
+The normalized summary shows that the visible bug occurs before real pandas execution: the agent chooses the wrong tool name. That makes a local tool-name validator sufficient.
 
-## Bug
+## Files
 
-The issue reports that `python_repl_ast` is not called consistently.
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
@@ -36,22 +36,8 @@ The issue reports that `python_repl_ast` is not called consistently.
 
 ## Expected Result
 
-Questions that require dataframe inspection should route to `python_repl_ast`.
+Both dataframe questions should map to the exact tool name `python_repl_ast`.
 
 ## Actual Result
 
-The buggy path handles one phrasing but misses a similar query:
-
-```text
-Buggy tool decision:
-False
-```
-
-## Why This Is Minimal
-
-The reproduction keeps only:
-
-- two representative questions
-- one buggy routing rule
-- one corrected routing rule
-
+The second question produces a descriptive sentence instead of the exact tool name, and the validator rejects it as an invalid tool.

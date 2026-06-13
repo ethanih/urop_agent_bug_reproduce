@@ -1,6 +1,6 @@
 # https://github.com/langchain-ai/langchain/issues/2241
 
-# Issue 2241 Reproduction
+# Issue 2241 Reproduction V2
 
 Source issue: `langchain-ai/langchain#2241`
 
@@ -8,13 +8,12 @@ Source issue: `langchain-ai/langchain#2241`
 
 This is a minimal reproduction.
 
-The failure is a parser bug caused by nested markdown code fences. A small
-string-based parser is enough to reproduce it.
+The normalized summary isolates a pure delimiter-collision bug, so the smallest reproduction is a single nested-fence response string plus a naive parser.
 
-## Bug
+## Files
 
-The issue reports that a multi-line markdown code block can break the
-`conversational_chat` agent response parsing.
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
@@ -37,19 +36,8 @@ The issue reports that a multi-line markdown code block can break the
 
 ## Expected Result
 
-The agent response should be parsed even if the payload contains an inner code
-block.
+The parser should preserve the full JSON payload, including the inner code block inside `action_input`.
 
 ## Actual Result
 
-The buggy parser returns only the truncated JSON payload extracted from the
-outer fence.
-
-## Why This Is Minimal
-
-The reproduction keeps only:
-
-- one markdown response string
-- one naive fence splitter
-- one fixed parser path
-
+The buggy parser truncates the payload at the nested fenced code block.

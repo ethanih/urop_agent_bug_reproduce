@@ -1,55 +1,63 @@
 #!/usr/bin/env python3
-"""Minimal reproduction for LangChain issue #2276.
-
-The issue reports an exception when the conversation agent receives output that
-is not valid JSON for the expected response format. This script models the
-invalid-tool path that triggers the failure.
-"""
+"""Two-stage minimal reproduction for LangChain issue #2276."""
 
 from __future__ import annotations
 
 import json
 
 
-def buggy_parse_agent_response(response_text: str) -> dict[str, str]:
-    # BUG: the parser assumes the model always returns valid JSON.
-    return json.loads(response_text)
+VALID_TOOLS = {"Final Answer"}
 
 
-def fixed_handle_agent_response(response_text: str) -> dict[str, str]:
-    # Correct behavior: detect the invalid tool response and convert it into a
-    # recovery path instead of crashing.
-    try:
-        return json.loads(response_text)
-    except json.JSONDecodeError:
-        return {"action": "Final Answer", "action_input": response_text}
+def parse_chat_json(text: str) -> dict[str, str]:
+    """Mirror the strict JSON parsing path from the issue traceback."""
+
+    return json.loads(text)
+
+
+def execute_tool(action: dict[str, str]) -> str:
+    tool_name = action["action"]
+    if tool_name not in VALID_TOOLS:
+        raise ValueError(f"{tool_name} is not a valid tool, try another one.")
+    return action["action_input"]
 
 
 def main() -> int:
-    response_text = "{action: recommend_tool, action_input: I recommend searching on LinkedIn.}"
+    first_retry_candidate = json.dumps(
+        {
+            "action": "recommend_tool",
+            "action_input": "Search LinkedIn for information on Will.",
+        }
+    )
+    second_retry_candidate = "Thought: I should try a different tool."
 
-    print("Model response:")
-    print(response_text)
+    print("First model output:")
+    print(first_retry_candidate)
+    print()
+
+    parsed = parse_chat_json(first_retry_candidate)
+
+    try:
+        execute_tool(parsed)
+    except ValueError as exc:
+        print("Invalid tool observation:")
+        print(exc)
+        print()
+        assert "recommend_tool is not a valid tool" in str(exc)
+
+    print("Second model output:")
+    print(second_retry_candidate)
     print()
 
     try:
-        parsed = buggy_parse_agent_response(response_text)
+        parse_chat_json(second_retry_candidate)
     except json.JSONDecodeError as exc:
-        print("Buggy parse error:")
+        print("Retry parse error:")
         print(exc)
-        print()
-        assert "Expecting" in str(exc)
-        parsed = fixed_handle_agent_response(response_text)
-    else:
-        print("Buggy parsed response:")
-        print(parsed)
-        print()
-        parsed = fixed_handle_agent_response(response_text)
+        assert "Expecting value" in str(exc)
+        return 0
 
-    print("Fixed handled response:")
-    print(parsed)
-    assert parsed["action"] == "Final Answer"
-    return 0
+    raise AssertionError("Expected retry parse failure did not occur")
 
 
 if __name__ == "__main__":

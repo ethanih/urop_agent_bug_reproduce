@@ -1,6 +1,6 @@
 # https://github.com/langchain-ai/langchain/issues/2276
 
-# Issue 2276 Reproduction
+# Issue 2276 Reproduction V2
 
 Source issue: `langchain-ai/langchain#2276`
 
@@ -8,13 +8,12 @@ Source issue: `langchain-ai/langchain#2276`
 
 This is a minimal reproduction.
 
-The failure is an invalid JSON / recovery-path bug. A tiny JSON parser is
-enough to show the problem.
+The normalized summary isolates a retry-path parser bug. The smallest reproduction is therefore a local two-step flow: valid JSON action, invalid-tool observation, then a non-JSON retry response.
 
-## Bug
+## Files
 
-The issue reports an exception when the conversation agent does not receive the
-expected JSON output.
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
@@ -37,18 +36,8 @@ expected JSON output.
 
 ## Expected Result
 
-The agent should recover from the invalid tool response instead of crashing.
+After rejecting the invalid tool, the retry path should recover gracefully instead of trying to parse a `Thought:` string as JSON.
 
 ## Actual Result
 
-The buggy path parses the response strictly and then the fixed path converts it
-into a final-answer fallback.
-
-## Why This Is Minimal
-
-The reproduction keeps only:
-
-- one invalid tool response
-- one strict JSON parser
-- one fallback handler
-
+The retry parser crashes with `JSONDecodeError`, matching the issue's core symptom.
