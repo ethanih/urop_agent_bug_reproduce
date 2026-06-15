@@ -4,40 +4,32 @@
 
 Source issue: `openai/codex#802`
 
-## Bug
+## Reproduction Type
 
-The issue describes a workflow where Codex suggests changes, but those changes
-do not end up applied to the filesystem.
+This is a minimal reproduction.
 
-This reproduction models that behavior with a minimal Python script:
-
-- create a temporary file
-- generate a suggested replacement
-- print the suggestion
-- intentionally skip the write/apply step
-- verify the file still contains the original content
-
-## Why This Is Minimal
-
-The script does not depend on Codex internals or a real patch engine. It only
-captures the observable failure:
+The script captures the exact visible behavior from the issue:
 
 - a change is proposed
-- the proposal is visible
+- the proposal is shown
 - the file on disk remains unchanged
 
 ## Environment
 
-- Python 3.12 or newer
+- Python 3.10 or newer
 - No external services required
+
+## Files
+
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Reproduction Steps
 
-1. Create a virtual environment:
+1. Open the reproduction directory:
 
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+   cd codex/codex-issue-802
    ```
 
 2. Run the script:
@@ -64,8 +56,4 @@ Actual file content after suggestion-only flow:
 before
 ```
 
-## Notes
-
-- The `apply_change(...)` function exists only to show the missing step.
-- It is intentionally not called, because the reproduction is about the broken
-  suggestion-only path.
+The missing apply step is the reproduced bug.

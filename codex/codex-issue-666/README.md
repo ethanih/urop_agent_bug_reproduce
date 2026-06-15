@@ -4,22 +4,20 @@
 
 Source issue: `openai/codex#666`
 
-## Bug
+## Reproduction Type
 
-The issue reports that Codex can generate a patch-like suggestion in the
-assistant message, but the change is not actually applied.
+This is a minimal reproduction.
 
-This MRE reproduces that behavior without depending on Codex itself:
+The original issue is about files being created with empty contents. This reproduction models that exact failure: generated content exists in memory, but empty strings are written to disk instead.
 
-- create a temporary file
-- generate a suggested patch
-- print the patch suggestion
-- intentionally skip the apply step
-- verify that the file content stays unchanged
+## Files
+
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
-- Python 3.12 or newer
+- Python 3.10 or newer
 - No network access required
 - No external services required
 
@@ -28,17 +26,10 @@ This MRE reproduces that behavior without depending on Codex itself:
 1. Open the reproduction directory:
 
    ```bash
-   cd codex-issue-666
+   cd codex/codex-issue-666
    ```
 
-2. Create a virtual environment if you want an isolated Python runtime:
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-3. Run the MRE:
+2. Run the MRE:
 
    ```bash
    python reproduce.py
@@ -46,31 +37,18 @@ This MRE reproduces that behavior without depending on Codex itself:
 
 ## Expected Result
 
-If the suggestion were correctly applied, the temporary file would change from
-`before` to `after`.
+The created files should contain the generated content.
 
 ## Actual Result
 
-The script prints the suggestion but leaves the file unchanged:
+The script creates files, but writes empty content:
 
 ```text
-Original file content:
-before
+Generated content for App.vue:
+<template><h1>Hello from generated app</h1></template>
 
-Suggested patch content:
-after
-
-Actual file content after suggestion-only flow:
-before
+Actual file content on disk for App.vue:
+''
 ```
 
-## Why This Is Minimal
-
-This reproduction keeps only the failure mechanism:
-
-- one temporary file
-- one generated patch suggestion
-- one missing apply step
-
-That is enough to reproduce the bug without pulling in a full frontend app or
-Codex internals.
+The same bug is shown for multiple created files.
