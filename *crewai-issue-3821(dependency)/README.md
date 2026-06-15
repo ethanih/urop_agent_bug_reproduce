@@ -8,7 +8,7 @@ Source issue: `crewAIInc/crewAI#3821`
 
 This is a minimal reproduction with a real Pydantic dependency.
 
-The issue is not about a specific remote model. It is about what happens when a field validator raises during structured output validation and the retry loop does not handle it correctly.
+The issue is not about a specific remote model. It is about what happens
 
 ## Files
 

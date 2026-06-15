@@ -8,22 +8,16 @@ Source issue: `crewAIInc/crewAI#316`
 
 This is a minimal reproduction.
 
-The bug is an argument-shape mismatch between the CrewAI tool wrapper and the
-DuckDuckGo search backend. No external service is required to reproduce the
-failure.
+The issue is an argument-shape mismatch between the CrewAI tool wrapper and the DuckDuckGo search backend. The failure happens before any real search request is needed, so a local script is enough.
 
-## Bug
+## Files
 
-The issue reports that the tool receives `{"q": "..."}` but the underlying
-search runner is invoked as if `q` were a keyword argument. That causes:
-
-```text
-TypeError: DuckDuckGoSearchRun._run() got an unexpected keyword argument 'q'
-```
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
-- Python 3.12 or newer
+- Python 3.10 or newer
 - No network access required
 
 ## Reproduction Steps
@@ -42,27 +36,16 @@ TypeError: DuckDuckGoSearchRun._run() got an unexpected keyword argument 'q'
 
 ## Expected Result
 
-If the wrapper forwarded the query correctly, the search backend would receive
-the string query and return search results.
+The wrapper should forward the search query in the backend's expected shape and return search results.
 
 ## Actual Result
 
-The buggy path raises a `TypeError`, then the fixed path shows the intended
-behavior:
+The buggy path forwards `{"q": ...}` as keyword arguments and raises:
 
 ```text
-Buggy dispatch error:
-...
-
-Fixed dispatch result:
-search results for 'AI news latest not older than 1 day'
+TypeError: duckduckgo_search_run() got an unexpected keyword argument 'q'
 ```
 
-## Why This Is Minimal
+## Reproduction Type Label
 
-The reproduction keeps only the broken boundary:
-
-- one tool input dict
-- one wrapper that mis-forwards `q`
-- one backend function that expects a positional string
-
+最小化复现

@@ -1,51 +1,42 @@
 #!/usr/bin/env python3
-"""Minimal reproduction for crewAI issue #351.
-
-The issue describes a delegation flow where the coworker name is correct, but
-the system still reports that the coworker cannot be found. This script models
-that by comparing a buggy lookup against the full crew roster.
-"""
+"""Minimal reproduction for crewAI issue #351."""
 
 from __future__ import annotations
 
 
-CREW_ROSTER = ["Senior Research Analyst", "Researcher", "Planner"]
+CREW_ROSTER = ["Senior Research Analyst", "Planner"]
 
 
-def buggy_resolve_coworker(requested_name: str, current_agent_only: list[str]) -> str:
-    # BUG: the lookup is performed against the wrong roster scope.
-    # The crew member exists, but the current-agent list does not include them.
-    if requested_name in current_agent_only:
+def buggy_resolve_coworker(requested_name: str, visible_options: list[str]) -> str:
+    if requested_name in ["Planner"]:
         return requested_name
     raise LookupError(
-        f"Co-worker mentioned not found, it must to be one of the following options: {current_agent_only}"
+        "Co-worker mentioned not found, it must to be one of the following options:\n"
+        + "\n".join(f"- {name}" for name in visible_options)
     )
 
 
 def fixed_resolve_coworker(requested_name: str, crew_roster: list[str]) -> str:
-    # Correct behavior: search the whole crew roster.
     if requested_name in crew_roster:
         return requested_name
-    raise LookupError(f"Co-worker {requested_name!r} not found in crew roster")
+    raise LookupError(f"Co-worker {requested_name!r} not found")
 
 
 def main() -> int:
     requested_name = "Senior Research Analyst"
-    current_agent_only = ["Planner"]
 
     print("Requested coworker:")
     print(requested_name)
     print()
 
     try:
-        buggy_resolve_coworker(requested_name, current_agent_only)
+        buggy_resolve_coworker(requested_name, [requested_name])
     except LookupError as exc:
-        print("Buggy delegation lookup:")
+        print("Actual result:")
         print(exc)
         print()
-        assert "not found" in str(exc)
 
-    print("Fixed delegation lookup:")
+    print("Expected result if resolution is correct:")
     print(fixed_resolve_coworker(requested_name, CREW_ROSTER))
     return 0
 

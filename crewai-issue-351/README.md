@@ -8,18 +8,16 @@ Source issue: `crewAIInc/crewAI#351`
 
 This is a minimal reproduction.
 
-The reported failure is a delegation lookup bug. The observable symptom can be
-reproduced with a small in-memory roster, without running a full crewAI stack or
-connecting to an LLM.
+The reported failure is a coworker-resolution bug. The contradiction is local: the coworker name is present, but the delegation lookup still rejects it. A full live CrewAI stack is not required to show that boundary.
 
-## Bug
+## Files
 
-The issue reports that the coworker name is correct, but the delegation flow
-still says the coworker is not found.
+- `normalized_issue_summary.md`: stage A normalized issue facts
+- `reproduce.py`: stage B reproduction
 
 ## Environment
 
-- Python 3.12 or newer
+- Python 3.10 or newer
 - No network access required
 
 ## Reproduction Steps
@@ -38,22 +36,12 @@ still says the coworker is not found.
 
 ## Expected Result
 
-The coworker should be resolved from the crew roster.
+Delegation should resolve `Senior Research Analyst` from the available crew roster.
 
 ## Actual Result
 
-The buggy lookup fails against the wrong roster scope:
+The buggy path rejects the coworker and emits the same contradictory style of error as the issue.
 
-```text
-Buggy delegation lookup:
-Co-worker mentioned not found, it must to be one of the following options: ['Planner']
-```
+## Reproduction Type Label
 
-## Why This Is Minimal
-
-The reproduction keeps only:
-
-- the requested coworker name
-- a small crew roster
-- the bad lookup scope
-
+最小化复现
