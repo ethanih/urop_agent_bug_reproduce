@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Minimal reproduction for crewAI issue #3821.
+
+This script isolates the retry-bypass mechanism described in the issue:
+a Pydantic field validator raises a raw exception, while the retry loop only
+handles ValueError-like validation failures. The second valid candidate is
+therefore never retried.
+"""
+
+from pydantic import BaseModel, field_validator
+
+
+class LabelOutput(BaseModel):
+    label: str
+
+    @field_validator("label")
+    @classmethod
+    def check_label(cls, value: str) -> str:
+        if value not in {"billing", "support"}:
+            raise Exception(f"Invalid label: {value}")
+        return value
+
+
+def buggy_retry_loop(candidates: list[dict[str, str]]) -> LabelOutput:
+    for attempt, candidate in enumerate(candidates, start=1):
+        print(f"Attempt {attempt}: {candidate!r}")
+        try:
+            return LabelOutput.model_validate(candidate)
+        except ValueError as exc:
+            print(f"Retryable validation error: {exc}")
+            continue
+    raise RuntimeError("No valid output produced")
+
+
+def main() -> None:
+    candidates = [
+        {"label": "wrong-label"},
+        {"label": "support"},
+    ]
+    buggy_retry_loop(candidates)
+
+
+if __name__ == "__main__":
+    main()

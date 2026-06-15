@@ -115,6 +115,14 @@
 - required_configuration: ...
 - required_execution_flow: ...
 
+## issue_related_context
+- issue_related_code:
+  - path_or_symbol: ...
+    kind: file | function | class | method | module | config
+    excerpt_or_role: ...
+- relevance_explanation:
+  - ...
+
 ## evidence_from_issue
 - explicit_reproduction_steps:
   - ...
@@ -153,6 +161,8 @@
 ```
 
 补充说明：
+- `issue_related_code` 只收录与当前 bug 直接相关的文件、函数、类、方法、模块或配置；如果 issue 没有明确指出，可结合上下文做最小必要推断，但必须在 `relevance_explanation` 或 `fact_vs_inference` 中说明依据。
+- `relevance_explanation` 不能只重复文件名，必须说明“为什么它相关”，例如它包含触发异常的直接访问、负责解析问题输入、承载报错路径，或决定关键环境分支。
 - `error_messages` 优先保留原文；若过长，可做必要截断，但必须保留最关键的异常类型、报错行和上下文。
 - `code_snippets` 可以是原文节选或最小相关片段；如果做了裁剪，需在内容中明确标注“节选”。
 - `missing_critical_info` 填会直接影响精确复现的缺失条件，例如版本号、输入样例、环境前提、鉴权方式、系统配置。
